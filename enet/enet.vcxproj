@@ -158,6 +158,7 @@
     <ClCompile Include="peer.c" />
     <ClCompile Include="protocol.c" />
     <ClCompile Include="unix.c" />
+    <ClCompile Include="unixepoll.c" />
     <ClCompile Include="win32.c" />
   </ItemGroup>
   <ItemGroup>
