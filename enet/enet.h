@@ -5,6 +5,9 @@
 #ifndef __ENET_ENET_H__
 #define __ENET_ENET_H__
 
+//…Ë÷√ π”√epoll
+#define EPOLL
+
 #ifdef __cplusplus
 extern "C"
 {

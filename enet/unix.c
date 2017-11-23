@@ -3,6 +3,7 @@
  @brief ENet Unix system specific functions
 */
 #ifndef _WIN32
+#ifndef EPOLL
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -553,5 +554,6 @@ enet_socket_wait (ENetSocket socket, enet_uint32 * condition, enet_uint32 timeou
 #endif
 }
 
+#endif
 #endif
 
