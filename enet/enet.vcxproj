@@ -171,6 +171,9 @@
     <ClInclude Include="utility.h" />
     <ClInclude Include="win32.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="makefile" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

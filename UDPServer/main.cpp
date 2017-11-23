@@ -14,7 +14,7 @@ int main()
 	ENetAddress address;
 	ENetHost * server;
 	address.host = ENET_HOST_ANY;
-	enet_address_set_host(&address, "127.0.0.1");
+	enet_address_set_host(&address, "0.0.0.0");
 	address.port = 8888;
 	server = enet_host_create(&address ,32,2,0,0);
 	if (server == NULL)
@@ -35,7 +35,7 @@ int main()
 					event.peer->address.host,
 					event.peer->address.port);
 				/* Store any relevant client information here. */
-				event.peer->data = "Client information";
+				event.peer->data = (void*)"Client information";
 				break;
 			case ENET_EVENT_TYPE_RECEIVE:
 				printf("A packet of length %u containing %s was received from %s on channel %u.\n",

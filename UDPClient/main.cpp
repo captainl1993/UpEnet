@@ -1,6 +1,7 @@
 #include <iostream>
 #include "enet.h"
-
+#include <string>
+#include <string.h>
 int main()
 {
 	if (enet_initialize() != 0)
@@ -26,7 +27,7 @@ int main()
 	ENetAddress address;
 	ENetEvent event;
 	ENetPeer *peer;
-	enet_address_set_host(&address, "localhost");
+	enet_address_set_host(&address, "127.0.0.1");
 
 	address.port = 8888;
 	peer = enet_host_connect(client, &address, 2, 0);
