@@ -39,15 +39,13 @@ int main()
 				event.peer->data = (void*)"Client information";
 				break;
 			case ENET_EVENT_TYPE_RECEIVE:
-				printf("A packet of length %u containing %s was received from %s on channel %u.\n",
+				/*printf("A packet of length %u containing %s was received from %s on channel %u.\n",
 					event.packet->dataLength,
 					event.packet->data,
 					event.peer->data,
-					event.channelID);
+					event.channelID);*/
 				/* Clean up the packet now that we're done using it. */
 				std::cout << event.packet->data << std::endl;
-
-
 				enet_packet_destroy(event.packet);
 				{
 					ENetPacket * packet = enet_packet_create("packet",
@@ -55,7 +53,7 @@ int main()
 						ENET_PACKET_FLAG_RELIABLE);
 					/* Extend the packet so and append the string "foo", so it now */
 					/* contains "packetfoo\0"                                      */
-					enet_packet_resize(packet, strlen("packetfoo") + 1);
+					enet_packet_resize(packet, strlen("packetfoo----------------------") + 1);
 					strcpy((char*)&packet->data[strlen("packet")], "foo");
 					enet_peer_send(event.peer, 0, packet);
 					enet_host_flush(server);
