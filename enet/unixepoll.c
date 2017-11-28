@@ -5,10 +5,14 @@
 #include <sys/socket.h>
 #include <sys/ioctl.h>
 #include <sys/time.h>
+#include <sys/wait.h>
 #include <arpa/inet.h>
+#include <sys/resource.h>
 #include <netinet/tcp.h>
+#include <netinet/in.h>
 #include <netdb.h>
 #include <unistd.h>
+#include <fcntl.h>
 #include <string.h>
 #include <errno.h>
 #include <time.h>
@@ -41,9 +45,24 @@
 #include <fcntl.h>
 #endif
 
-#ifdef HAS_POLL
-#include <sys/poll.h>
-#endif
+#include <sys/epoll.h>
+#define MAXLINE 100
+#define OPEN_MAX 100
+#define LISTENQ 20
+#define SERV_TPORT 5000
+#define SERV_UPORT 5001
+
+#define INFTIM 1000
+
+int setnonblocking(int sockfd)
+{
+	if (fcntl(sockfd, F_SETFL, fcntl(sockfd, F_GETFD, 0) | O_NONBLOCK) == -1)
+	{
+		return -1;
+	}
+	return 0;
+}
+
 
 #ifndef HAS_SOCKLEN_T
 //typedef int socklen_t;
@@ -54,6 +73,13 @@
 #endif
 
 static enet_uint32 timeBase = 0;
+
+//epoll
+static int epfd = 0;
+static struct epoll_event ev, events[20];
+int count = 0;
+int sockfd = -1;
+ssize_t n;
 
 int enet_initialize (void)
 {
@@ -194,9 +220,18 @@ int enet_socket_bind (ENetSocket socket, const ENetAddress * address)
        sin.sin_addr.s_addr = INADDR_ANY;
     }
 
-    return bind (socket,
+    int ret= bind (socket,
                  (struct sockaddr *) & sin,
                  sizeof (struct sockaddr_in)); 
+
+	//设置epoll
+	epfd = epoll_create(EPOLLFDSIZE);
+
+	ev.data.fd = socket;
+	ev.events = EPOLLIN | EPOLLET;
+	epoll_ctl(epfd, EPOLL_CTL_ADD, socket, &ev);
+
+	return ret;
 }
 
 int enet_socket_get_address (ENetSocket socket, ENetAddress * address)
@@ -443,89 +478,87 @@ int enet_socketset_select (ENetSocket maxSocket, ENetSocketSet * readSet, ENetSo
 
 int enet_socket_wait (ENetSocket socket, enet_uint32 * condition, enet_uint32 timeout)
 {
-#ifdef HAS_POLL
-    struct pollfd pollSocket;
-    int pollCount;
-    
-    pollSocket.fd = socket;
-    pollSocket.events = 0;
 
-    if (* condition & ENET_SOCKET_WAIT_SEND)
-      pollSocket.events |= POLLOUT;
+	int nfds = epoll_wait(epfd, events, 20, 500);
+	socklen_t clilen;
+	struct sockaddr_in clientaddr;
+	
+	char line[MAXLINE] = "abcdefg";
+	if (nfds < 0)
+	{
+		if (errno == EINTR && * condition & ENET_SOCKET_WAIT_INTERRUPT)
+		{
+			*condition = ENET_SOCKET_WAIT_INTERRUPT;
+			return 0;
+		}
+		return -1;
+	}
+	*condition = ENET_SOCKET_WAIT_NONE;
+	int i = 0;
+	for (; i < nfds; ++i)
+	{
+		printf("----------\n");
 
-    if (* condition & ENET_SOCKET_WAIT_RECEIVE)
-      pollSocket.events |= POLLIN;
+		if (events[i].data.fd == socket)
+		{
+			if (events[i].events && EPOLLIN)
+				printf("udp receive begin!\n");
+			n = recvfrom(socket, line, MAXLINE, 0,
+				(struct sockaddr *)&clientaddr, &clilen);
+			if (n < 0)
+				perror("udp receive ERROR\n");
+			else
+				printf("udp receive right!\n");
 
-    pollCount = poll (& pollSocket, 1, timeout);
+		}
+		else if (events[i].events&EPOLLIN)//如果是已经连接的用户，并且收到数据，那么进行读入。
+		{
+			*condition |= ENET_SOCKET_WAIT_RECEIVE;
+			printf("count == %d\n", count);
+			count++;
+			if ((sockfd = events[i].data.fd) < 0)
+				continue;
+			if ((n = read(sockfd, line, MAXLINE)) < 0) {
+				if (errno == ECONNRESET) {
+					//close(sockfd);
+					events[i].data.fd = -1;
+				}
+				else
+					printf("readline error\n");
+			}
+			else if (n == 0) {
+				//printf("close tcp port\n");
+				//close(sockfd);
+				events[i].data.fd = -1;
+			}
+			else
+			{
+				printf("read OK %s\n", line);
+				line[n] = '/0';
+			}
+			ev.data.fd = sockfd;
+			ev.events = EPOLLOUT | EPOLLET;
+			epoll_ctl(epfd, EPOLL_CTL_MOD, condition, &ev);
+		}
+		else if (events[i].events&EPOLLOUT) // 如果有数据发送
+		{
+			*condition |= ENET_SOCKET_WAIT_SEND;
+			printf("write \n");
+			//sockfd = events[i].data.fd;
+			//write(sockfd, line, n);
+			//设置用于读操作的文件描述符
 
-    if (pollCount < 0)
-    {
-        if (errno == EINTR && * condition & ENET_SOCKET_WAIT_INTERRUPT)
-        {
-            * condition = ENET_SOCKET_WAIT_INTERRUPT;
+			//ev.data.fd = sockfd;
+			ev.data.fd = events[i].data.fd;
+			//设置用于注测的读操作事件
 
-            return 0;
-        }
+			ev.events = EPOLLIN | EPOLLET;
+			//修改sockfd上要处理的事件为EPOLIN
 
-        return -1;
-    }
-
-    * condition = ENET_SOCKET_WAIT_NONE;
-
-    if (pollCount == 0)
-      return 0;
-
-    if (pollSocket.revents & POLLOUT)
-      * condition |= ENET_SOCKET_WAIT_SEND;
-    
-    if (pollSocket.revents & POLLIN)
-      * condition |= ENET_SOCKET_WAIT_RECEIVE;
-
+			epoll_ctl(epfd, EPOLL_CTL_MOD, events[i].data.fd, &ev);
+		}
+	}
     return 0;
-#else
-    fd_set readSet, writeSet;
-    struct timeval timeVal;
-    int selectCount;
-
-    timeVal.tv_sec = timeout / 1000;
-    timeVal.tv_usec = (timeout % 1000) * 1000;
-
-    FD_ZERO (& readSet);
-    FD_ZERO (& writeSet);
-
-    if (* condition & ENET_SOCKET_WAIT_SEND)
-      FD_SET (socket, & writeSet);
-
-    if (* condition & ENET_SOCKET_WAIT_RECEIVE)
-      FD_SET (socket, & readSet);
-
-    selectCount = select (socket + 1, & readSet, & writeSet, NULL, & timeVal);
-
-    if (selectCount < 0)
-    {
-        if (errno == EINTR && * condition & ENET_SOCKET_WAIT_INTERRUPT)
-        {
-            * condition = ENET_SOCKET_WAIT_INTERRUPT;
-
-            return 0;
-        }
-      
-        return -1;
-    }
-
-    * condition = ENET_SOCKET_WAIT_NONE;
-
-    if (selectCount == 0)
-      return 0;
-
-    if (FD_ISSET (socket, & writeSet))
-      * condition |= ENET_SOCKET_WAIT_SEND;
-
-    if (FD_ISSET (socket, & readSet))
-      * condition |= ENET_SOCKET_WAIT_RECEIVE;
-
-    return 0;
-#endif
 }
 
 #endif

@@ -169,7 +169,6 @@
     <ClInclude Include="time.h" />
     <ClInclude Include="types.h" />
     <ClInclude Include="unix.h" />
-    <ClInclude Include="utility.h" />
     <ClInclude Include="win32.h" />
   </ItemGroup>
   <ItemGroup>

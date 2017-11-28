@@ -1,44 +1,7 @@
-/** 
- @file  peer.c
- @brief ENet peer management functions
-*/
 #include <string.h>
 #define ENET_BUILDING_LIB 1
 #include "enet.h"
 
-/** @defgroup peer ENet peer functions 
-    @{
-*/
-
-/** Configures throttle parameter for a peer.
-
-    Unreliable packets are dropped by ENet in response to the varying conditions
-    of the Internet connection to the peer.  The throttle represents a probability
-    that an unreliable packet should not be dropped and thus sent by ENet to the peer.
-    The lowest mean round trip time from the sending of a reliable packet to the
-    receipt of its acknowledgement is measured over an amount of time specified by
-    the interval parameter in milliseconds.  If a measured round trip time happens to
-    be significantly less than the mean round trip time measured over the interval, 
-    then the throttle probability is increased to allow more traffic by an amount
-    specified in the acceleration parameter, which is a ratio to the ENET_PEER_PACKET_THROTTLE_SCALE
-    constant.  If a measured round trip time happens to be significantly greater than
-    the mean round trip time measured over the interval, then the throttle probability
-    is decreased to limit traffic by an amount specified in the deceleration parameter, which
-    is a ratio to the ENET_PEER_PACKET_THROTTLE_SCALE constant.  When the throttle has
-    a value of ENET_PEER_PACKET_THROTTLE_SCALE, no unreliable packets are dropped by 
-    ENet, and so 100% of all unreliable packets will be sent.  When the throttle has a
-    value of 0, all unreliable packets are dropped by ENet, and so 0% of all unreliable
-    packets will be sent.  Intermediate values for the throttle represent intermediate
-    probabilities between 0% and 100% of unreliable packets being sent.  The bandwidth
-    limits of the local and foreign hosts are taken into account to determine a 
-    sensible limit for the throttle probability above which it should not raise even in
-    the best of conditions.
-
-    @param peer peer to configure 
-    @param interval interval, in milliseconds, over which to measure lowest mean RTT; the default value is ENET_PEER_PACKET_THROTTLE_INTERVAL.
-    @param acceleration rate at which to increase the throttle probability as mean RTT declines
-    @param deceleration rate at which to decrease the throttle probability as mean RTT increases
-*/
 void
 enet_peer_throttle_configure (ENetPeer * peer, enet_uint32 interval, enet_uint32 acceleration, enet_uint32 deceleration)
 {
@@ -58,8 +21,7 @@ enet_peer_throttle_configure (ENetPeer * peer, enet_uint32 interval, enet_uint32
     enet_peer_queue_outgoing_command (peer, & command, NULL, 0, 0);
 }
 
-int
-enet_peer_throttle (ENetPeer * peer, enet_uint32 rtt)
+int enet_peer_throttle (ENetPeer * peer, enet_uint32 rtt)
 {
     if (peer -> lastRoundTripTime <= peer -> lastRoundTripTimeVariance)
     {
@@ -89,15 +51,7 @@ enet_peer_throttle (ENetPeer * peer, enet_uint32 rtt)
     return 0;
 }
 
-/** Queues a packet to be sent.
-    @param peer destination for the packet
-    @param channelID channel on which to send
-    @param packet packet to send
-    @retval 0 on success
-    @retval < 0 on failure
-*/
-int
-enet_peer_send (ENetPeer * peer, enet_uint8 channelID, ENetPacket * packet)
+int enet_peer_send (ENetPeer * peer, enet_uint8 channelID, ENetPacket * packet)
 {
    ENetChannel * channel = & peer -> channels [channelID];
    ENetProtocol command;
@@ -213,13 +167,7 @@ enet_peer_send (ENetPeer * peer, enet_uint8 channelID, ENetPacket * packet)
    return 0;
 }
 
-/** Attempts to dequeue any incoming queued packet.
-    @param peer peer to dequeue packets from
-    @param channelID holds the channel ID of the channel the packet was received on success
-    @returns a pointer to the packet, or NULL if there are no available incoming queued packets
-*/
-ENetPacket *
-enet_peer_receive (ENetPeer * peer, enet_uint8 * channelID)
+ENetPacket * enet_peer_receive (ENetPeer * peer, enet_uint8 * channelID)
 {
    ENetIncomingCommand * incomingCommand;
    ENetPacket * packet;
@@ -246,8 +194,7 @@ enet_peer_receive (ENetPeer * peer, enet_uint8 * channelID)
    return packet;
 }
 
-static void
-enet_peer_reset_outgoing_commands (ENetList * queue)
+static void enet_peer_reset_outgoing_commands (ENetList * queue)
 {
     ENetOutgoingCommand * outgoingCommand;
 
@@ -267,8 +214,7 @@ enet_peer_reset_outgoing_commands (ENetList * queue)
     }
 }
 
-static void
-enet_peer_remove_incoming_commands (ENetList * queue, ENetListIterator startCommand, ENetListIterator endCommand)
+static void enet_peer_remove_incoming_commands (ENetList * queue, ENetListIterator startCommand, ENetListIterator endCommand)
 {
     ENetListIterator currentCommand;    
     
@@ -295,14 +241,12 @@ enet_peer_remove_incoming_commands (ENetList * queue, ENetListIterator startComm
     }
 }
 
-static void
-enet_peer_reset_incoming_commands (ENetList * queue)
+static void enet_peer_reset_incoming_commands (ENetList * queue)
 {
     enet_peer_remove_incoming_commands(queue, enet_list_begin (queue), enet_list_end (queue));
 }
  
-void
-enet_peer_reset_queues (ENetPeer * peer)
+void enet_peer_reset_queues (ENetPeer * peer)
 {
     ENetChannel * channel;
 
@@ -339,8 +283,7 @@ enet_peer_reset_queues (ENetPeer * peer)
     peer -> channelCount = 0;
 }
 
-void
-enet_peer_on_connect (ENetPeer * peer)
+void enet_peer_on_connect (ENetPeer * peer)
 {
     if (peer -> state != ENET_PEER_STATE_CONNECTED && peer -> state != ENET_PEER_STATE_DISCONNECT_LATER)
     {
@@ -351,8 +294,7 @@ enet_peer_on_connect (ENetPeer * peer)
     }
 }
 
-void
-enet_peer_on_disconnect (ENetPeer * peer)
+void enet_peer_on_disconnect (ENetPeer * peer)
 {
     if (peer -> state == ENET_PEER_STATE_CONNECTED || peer -> state == ENET_PEER_STATE_DISCONNECT_LATER)
     {
@@ -363,13 +305,7 @@ enet_peer_on_disconnect (ENetPeer * peer)
     }
 }
 
-/** Forcefully disconnects a peer.
-    @param peer peer to forcefully disconnect
-    @remarks The foreign host represented by the peer is not notified of the disconnection and will timeout
-    on its connection to the local host.
-*/
-void
-enet_peer_reset (ENetPeer * peer)
+void enet_peer_reset (ENetPeer * peer)
 {
     enet_peer_on_disconnect (peer);
         
@@ -424,15 +360,7 @@ enet_peer_reset (ENetPeer * peer)
     enet_peer_reset_queues (peer);
 }
 
-/** Sends a ping request to a peer.
-    @param peer destination for the ping request
-    @remarks ping requests factor into the mean round trip time as designated by the 
-    roundTripTime field in the ENetPeer structure.  ENet automatically pings all connected
-    peers at regular intervals, however, this function may be called to ensure more
-    frequent ping requests.
-*/
-void
-enet_peer_ping (ENetPeer * peer)
+void enet_peer_ping (ENetPeer * peer)
 {
     ENetProtocol command;
 
@@ -445,55 +373,18 @@ enet_peer_ping (ENetPeer * peer)
     enet_peer_queue_outgoing_command (peer, & command, NULL, 0, 0);
 }
 
-/** Sets the interval at which pings will be sent to a peer. 
-    
-    Pings are used both to monitor the liveness of the connection and also to dynamically
-    adjust the throttle during periods of low traffic so that the throttle has reasonable
-    responsiveness during traffic spikes.
-
-    @param peer the peer to adjust
-    @param pingInterval the interval at which to send pings; defaults to ENET_PEER_PING_INTERVAL if 0
-*/
-void
-enet_peer_ping_interval (ENetPeer * peer, enet_uint32 pingInterval)
+void enet_peer_ping_interval (ENetPeer * peer, enet_uint32 pingInterval)
 {
     peer -> pingInterval = pingInterval ? pingInterval : ENET_PEER_PING_INTERVAL;
 }
-
-/** Sets the timeout parameters for a peer.
-
-    The timeout parameter control how and when a peer will timeout from a failure to acknowledge
-    reliable traffic. Timeout values use an exponential backoff mechanism, where if a reliable
-    packet is not acknowledge within some multiple of the average RTT plus a variance tolerance, 
-    the timeout will be doubled until it reaches a set limit. If the timeout is thus at this
-    limit and reliable packets have been sent but not acknowledged within a certain minimum time 
-    period, the peer will be disconnected. Alternatively, if reliable packets have been sent
-    but not acknowledged for a certain maximum time period, the peer will be disconnected regardless
-    of the current timeout limit value.
-    
-    @param peer the peer to adjust
-    @param timeoutLimit the timeout limit; defaults to ENET_PEER_TIMEOUT_LIMIT if 0
-    @param timeoutMinimum the timeout minimum; defaults to ENET_PEER_TIMEOUT_MINIMUM if 0
-    @param timeoutMaximum the timeout maximum; defaults to ENET_PEER_TIMEOUT_MAXIMUM if 0
-*/
-
-void
-enet_peer_timeout (ENetPeer * peer, enet_uint32 timeoutLimit, enet_uint32 timeoutMinimum, enet_uint32 timeoutMaximum)
+void enet_peer_timeout (ENetPeer * peer, enet_uint32 timeoutLimit, enet_uint32 timeoutMinimum, enet_uint32 timeoutMaximum)
 {
     peer -> timeoutLimit = timeoutLimit ? timeoutLimit : ENET_PEER_TIMEOUT_LIMIT;
     peer -> timeoutMinimum = timeoutMinimum ? timeoutMinimum : ENET_PEER_TIMEOUT_MINIMUM;
     peer -> timeoutMaximum = timeoutMaximum ? timeoutMaximum : ENET_PEER_TIMEOUT_MAXIMUM;
 }
 
-/** Force an immediate disconnection from a peer.
-    @param peer peer to disconnect
-    @param data data describing the disconnection
-    @remarks No ENET_EVENT_DISCONNECT event will be generated. The foreign peer is not
-    guaranteed to receive the disconnect notification, and is reset immediately upon
-    return from this function.
-*/
-void
-enet_peer_disconnect_now (ENetPeer * peer, enet_uint32 data)
+void enet_peer_disconnect_now (ENetPeer * peer, enet_uint32 data)
 {
     ENetProtocol command;
 
@@ -517,14 +408,7 @@ enet_peer_disconnect_now (ENetPeer * peer, enet_uint32 data)
     enet_peer_reset (peer);
 }
 
-/** Request a disconnection from a peer.
-    @param peer peer to request a disconnection
-    @param data data describing the disconnection
-    @remarks An ENET_EVENT_DISCONNECT event will be generated by enet_host_service()
-    once the disconnection is complete.
-*/
-void
-enet_peer_disconnect (ENetPeer * peer, enet_uint32 data)
+void enet_peer_disconnect (ENetPeer * peer, enet_uint32 data)
 {
     ENetProtocol command;
 
@@ -560,14 +444,7 @@ enet_peer_disconnect (ENetPeer * peer, enet_uint32 data)
     }
 }
 
-/** Request a disconnection from a peer, but only after all queued outgoing packets are sent.
-    @param peer peer to request a disconnection
-    @param data data describing the disconnection
-    @remarks An ENET_EVENT_DISCONNECT event will be generated by enet_host_service()
-    once the disconnection is complete.
-*/
-void
-enet_peer_disconnect_later (ENetPeer * peer, enet_uint32 data)
+void enet_peer_disconnect_later (ENetPeer * peer, enet_uint32 data)
 {   
     if ((peer -> state == ENET_PEER_STATE_CONNECTED || peer -> state == ENET_PEER_STATE_DISCONNECT_LATER) && 
         ! (enet_list_empty (& peer -> outgoingReliableCommands) &&
@@ -581,8 +458,7 @@ enet_peer_disconnect_later (ENetPeer * peer, enet_uint32 data)
       enet_peer_disconnect (peer, data);
 }
 
-ENetAcknowledgement *
-enet_peer_queue_acknowledgement (ENetPeer * peer, const ENetProtocol * command, enet_uint16 sentTime)
+ENetAcknowledgement * enet_peer_queue_acknowledgement (ENetPeer * peer, const ENetProtocol * command, enet_uint16 sentTime)
 {
     ENetAcknowledgement * acknowledgement;
 
@@ -613,8 +489,7 @@ enet_peer_queue_acknowledgement (ENetPeer * peer, const ENetProtocol * command, 
     return acknowledgement;
 }
 
-void
-enet_peer_setup_outgoing_command (ENetPeer * peer, ENetOutgoingCommand * outgoingCommand)
+void enet_peer_setup_outgoing_command (ENetPeer * peer, ENetOutgoingCommand * outgoingCommand)
 {
     ENetChannel * channel = & peer -> channels [outgoingCommand -> command.header.channelID];
     
@@ -679,8 +554,7 @@ enet_peer_setup_outgoing_command (ENetPeer * peer, ENetOutgoingCommand * outgoin
       enet_list_insert (enet_list_end (& peer -> outgoingUnreliableCommands), outgoingCommand);
 }
 
-ENetOutgoingCommand *
-enet_peer_queue_outgoing_command (ENetPeer * peer, const ENetProtocol * command, ENetPacket * packet, enet_uint32 offset, enet_uint16 length)
+ENetOutgoingCommand * enet_peer_queue_outgoing_command (ENetPeer * peer, const ENetProtocol * command, ENetPacket * packet, enet_uint32 offset, enet_uint16 length)
 {
     ENetOutgoingCommand * outgoingCommand = (ENetOutgoingCommand *) enet_malloc (sizeof (ENetOutgoingCommand));
     if (outgoingCommand == NULL)
@@ -698,8 +572,7 @@ enet_peer_queue_outgoing_command (ENetPeer * peer, const ENetProtocol * command,
     return outgoingCommand;
 }
 
-void
-enet_peer_dispatch_incoming_unreliable_commands (ENetPeer * peer, ENetChannel * channel)
+void enet_peer_dispatch_incoming_unreliable_commands (ENetPeer * peer, ENetChannel * channel)
 {
     ENetListIterator droppedCommand, startCommand, currentCommand;
 
@@ -781,8 +654,7 @@ enet_peer_dispatch_incoming_unreliable_commands (ENetPeer * peer, ENetChannel * 
     enet_peer_remove_incoming_commands (& channel -> incomingUnreliableCommands, enet_list_begin (& channel -> incomingUnreliableCommands), droppedCommand);
 }
 
-void
-enet_peer_dispatch_incoming_reliable_commands (ENetPeer * peer, ENetChannel * channel)
+void enet_peer_dispatch_incoming_reliable_commands (ENetPeer * peer, ENetChannel * channel)
 {
     ENetListIterator currentCommand;
 
@@ -820,8 +692,7 @@ enet_peer_dispatch_incoming_reliable_commands (ENetPeer * peer, ENetChannel * ch
        enet_peer_dispatch_incoming_unreliable_commands (peer, channel);
 }
 
-ENetIncomingCommand *
-enet_peer_queue_incoming_command (ENetPeer * peer, const ENetProtocol * command, const void * data, size_t dataLength, enet_uint32 flags, enet_uint32 fragmentCount)
+ENetIncomingCommand * enet_peer_queue_incoming_command (ENetPeer * peer, const ENetProtocol * command, const void * data, size_t dataLength, enet_uint32 flags, enet_uint32 fragmentCount)
 {
     static ENetIncomingCommand dummyCommand;
 
@@ -1001,4 +872,3 @@ notifyError:
     return NULL;
 }
 
-/** @} */

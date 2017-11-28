@@ -45,8 +45,7 @@ typedef struct _ENetRangeCoder
     ENetSymbol symbols[4096];
 } ENetRangeCoder;
 
-void *
-enet_range_coder_create (void)
+void * enet_range_coder_create (void)
 {
     ENetRangeCoder * rangeCoder = (ENetRangeCoder *) enet_malloc (sizeof (ENetRangeCoder));
     if (rangeCoder == NULL)
@@ -55,8 +54,7 @@ enet_range_coder_create (void)
     return rangeCoder;
 }
 
-void
-enet_range_coder_destroy (void * context)
+void enet_range_coder_destroy (void * context)
 {
     ENetRangeCoder * rangeCoder = (ENetRangeCoder *) context;
     if (rangeCoder == NULL)
@@ -87,8 +85,7 @@ enet_range_coder_destroy (void * context)
     (context) -> symbols = 0; \
 }
 
-static enet_uint16
-enet_symbol_rescale (ENetSymbol * symbol)
+static enet_uint16 enet_symbol_rescale (ENetSymbol * symbol)
 {
     enet_uint16 total = 0;
     for (;;)
@@ -243,8 +240,7 @@ ENET_CONTEXT_WALK(context, { \
 })
 #endif
 
-size_t
-enet_range_coder_compress (void * context, const ENetBuffer * inBuffers, size_t inBufferCount, size_t inLimit, enet_uint8 * outData, size_t outLimit)
+size_t enet_range_coder_compress (void * context, const ENetBuffer * inBuffers, size_t inBufferCount, size_t inLimit, enet_uint8 * outData, size_t outLimit)
 {
     ENetRangeCoder * rangeCoder = (ENetRangeCoder *) context;
     enet_uint8 * outStart = outData, * outEnd = & outData [outLimit];
@@ -495,8 +491,7 @@ typedef struct _ENetExclude
 
 #define ENET_CONTEXT_NOT_EXCLUDED(value_, after, before)
 
-size_t
-enet_range_coder_decompress (void * context, const enet_uint8 * inData, size_t inLimit, enet_uint8 * outData, size_t outLimit)
+size_t enet_range_coder_decompress (void * context, const enet_uint8 * inData, size_t inLimit, enet_uint8 * outData, size_t outLimit)
 {
     ENetRangeCoder * rangeCoder = (ENetRangeCoder *) context;
     enet_uint8 * outStart = outData, * outEnd = & outData [outLimit];
@@ -625,17 +620,8 @@ enet_range_coder_decompress (void * context, const enet_uint8 * inData, size_t i
                         
     return (size_t) (outData - outStart);
 }
-
-/** @defgroup host ENet host functions
-    @{
-*/
-
-/** Sets the packet compressor the host should use to the default range coder.
-    @param host host to enable the range coder for
-    @returns 0 on success, < 0 on failure
-*/
-int
-enet_host_compress_with_range_coder (ENetHost * host)
+ 
+int enet_host_compress_with_range_coder (ENetHost * host)
 {
     ENetCompressor compressor;
     memset (& compressor, 0, sizeof (compressor));
@@ -648,7 +634,4 @@ enet_host_compress_with_range_coder (ENetHost * host)
     enet_host_compress (host, & compressor);
     return 0;
 }
-    
-/** @} */
-    
-     
+ 

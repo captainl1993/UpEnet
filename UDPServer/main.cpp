@@ -1,6 +1,7 @@
 #include <iostream>
 #include "enet.h"
-
+#include <string>
+#include <string.h>
 
 int main()
 {
@@ -26,7 +27,7 @@ int main()
 	ENetEvent event;
 	while (true)
 	{
-		while (enet_host_service(server, &event, 10000) > 0)
+		while (enet_host_service(server, &event, 1000) >= 0)
 		{
 			switch (event.type)
 			{
@@ -45,7 +46,20 @@ int main()
 					event.channelID);
 				/* Clean up the packet now that we're done using it. */
 				std::cout << event.packet->data << std::endl;
+
+
 				enet_packet_destroy(event.packet);
+				{
+					ENetPacket * packet = enet_packet_create("packet",
+						strlen("packet") + 1,
+						ENET_PACKET_FLAG_RELIABLE);
+					/* Extend the packet so and append the string "foo", so it now */
+					/* contains "packetfoo\0"                                      */
+					enet_packet_resize(packet, strlen("packetfoo") + 1);
+					strcpy((char*)&packet->data[strlen("packet")], "foo");
+					enet_peer_send(event.peer, 0, packet);
+					enet_host_flush(server);
+				}
 				break;
 
 			case ENET_EVENT_TYPE_DISCONNECT:

@@ -39,7 +39,7 @@ int main()
 	}
 	while (true)
 	{
-		if (enet_host_service(client, &event, 5000) > 0)
+		if (enet_host_service(client, &event, 1000) >= 0)
 		{
 			if (event.type == ENET_EVENT_TYPE_CONNECT)
 			{
@@ -60,13 +60,35 @@ int main()
 			}
 			else if (event.type == ENET_EVENT_TYPE_RECEIVE)
 			{
+				printf("A packet of length %u containing %s was received from %d on channel %u.\n",
+					event.packet->dataLength,
+					event.packet->data,
+					event.peer->address.host,
+					event.channelID);
+				/* Clean up the packet now that we're done using it. */
+				std::cout << event.packet->data << std::endl;
+
+
+				enet_packet_destroy(event.packet);
+
+				puts("Connection to some.server.net:1234 succeeded.");
+				/* Create a reliable packet of size 7 containing "packet\0" */
+				ENetPacket * packet = enet_packet_create("packet",
+					strlen("packet") + 1,
+					ENET_PACKET_FLAG_RELIABLE);
+				/* Extend the packet so and append the string "foo", so it now */
+				/* contains "packetfoo\0"                                      */
+				enet_packet_resize(packet, strlen("packetfoo") + 1);
+				strcpy((char*)&packet->data[strlen("packet")], "foo");
+				enet_peer_send(peer, 0, packet);
+				enet_host_flush(client);
 			}
 		}
 		else
 		{
 			enet_peer_reset(peer);
 			puts("Connection to some.server.net:1234 failed.");
-			enet_host_connect(client, &address, 2, 0);
+			//enet_host_connect(client, &address, 2, 0);
 		}
 	}
 	enet_host_destroy(client);

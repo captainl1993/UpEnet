@@ -1,12 +1,4 @@
-/** 
- @file  enet.h
- @brief ENet public header file
-*/
-#ifndef __ENET_ENET_H__
-#define __ENET_ENET_H__
-
-//设置使用epoll
-#define EPOLL
+#pragma once
 
 #ifdef __cplusplus
 extern "C"
@@ -25,6 +17,8 @@ extern "C"
 #include "protocol.h"
 #include "list.h"
 #include "callbacks.h"
+//数据类型
+
 
 #define ENET_VERSION_MAJOR 1
 #define ENET_VERSION_MINOR 3
@@ -34,6 +28,13 @@ extern "C"
 #define ENET_VERSION_GET_MINOR(version) (((version)>>8)&0xFF)
 #define ENET_VERSION_GET_PATCH(version) ((version)&0xFF)
 #define ENET_VERSION ENET_VERSION_CREATE(ENET_VERSION_MAJOR, ENET_VERSION_MINOR, ENET_VERSION_PATCH)
+
+#define ENET_MAX(x, y) ((x) > (y) ? (x) : (y))
+#define ENET_MIN(x, y) ((x) < (y) ? (x) : (y))
+
+//time
+
+
 
 typedef enet_uint32 ENetVersion;
 
@@ -590,6 +591,4 @@ extern size_t enet_protocol_command_size (enet_uint8);
 #ifdef __cplusplus
 }
 #endif
-
-#endif /* __ENET_ENET_H__ */
 

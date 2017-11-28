@@ -1,7 +1,3 @@
-/** 
- @file  win32.c
- @brief ENet Win32 system specific functions
-*/
 #ifdef _WIN32
 
 #define ENET_BUILDING_LIB 1
@@ -11,8 +7,7 @@
 
 static enet_uint32 timeBase = 0;
 
-int
-enet_initialize (void)
+int enet_initialize (void)
 {
     WORD versionRequested = MAKEWORD (1, 1);
     WSADATA wsaData;
@@ -33,34 +28,29 @@ enet_initialize (void)
     return 0;
 }
 
-void
-enet_deinitialize (void)
+void enet_deinitialize (void)
 {
     timeEndPeriod (1);
 
     WSACleanup ();
 }
 
-enet_uint32
-enet_host_random_seed (void)
+enet_uint32 enet_host_random_seed (void)
 {
     return (enet_uint32) timeGetTime ();
 }
 
-enet_uint32
-enet_time_get (void)
+enet_uint32 enet_time_get (void)
 {
     return (enet_uint32) timeGetTime () - timeBase;
 }
 
-void
-enet_time_set (enet_uint32 newTimeBase)
+void enet_time_set (enet_uint32 newTimeBase)
 {
     timeBase = (enet_uint32) timeGetTime () - newTimeBase;
 }
 
-int
-enet_address_set_host (ENetAddress * address, const char * name)
+int enet_address_set_host (ENetAddress * address, const char * name)
 {
     struct hostent * hostEntry;
 
@@ -80,8 +70,7 @@ enet_address_set_host (ENetAddress * address, const char * name)
     return 0;
 }
 
-int
-enet_address_get_host_ip (const ENetAddress * address, char * name, size_t nameLength)
+int enet_address_get_host_ip (const ENetAddress * address, char * name, size_t nameLength)
 {
     char * addr = inet_ntoa (* (struct in_addr *) & address -> host);
     if (addr == NULL)
@@ -96,8 +85,7 @@ enet_address_get_host_ip (const ENetAddress * address, char * name, size_t nameL
     return 0;
 }
 
-int
-enet_address_get_host (const ENetAddress * address, char * name, size_t nameLength)
+int enet_address_get_host (const ENetAddress * address, char * name, size_t nameLength)
 {
     struct in_addr in;
     struct hostent * hostEntry;
@@ -118,8 +106,7 @@ enet_address_get_host (const ENetAddress * address, char * name, size_t nameLeng
     return 0;
 }
 
-int
-enet_socket_bind (ENetSocket socket, const ENetAddress * address)
+int enet_socket_bind (ENetSocket socket, const ENetAddress * address)
 {
     struct sockaddr_in sin;
 
@@ -143,8 +130,7 @@ enet_socket_bind (ENetSocket socket, const ENetAddress * address)
                  sizeof (struct sockaddr_in)) == SOCKET_ERROR ? -1 : 0;
 }
 
-int
-enet_socket_get_address (ENetSocket socket, ENetAddress * address)
+int enet_socket_get_address (ENetSocket socket, ENetAddress * address)
 {
     struct sockaddr_in sin;
     int sinLength = sizeof (struct sockaddr_in);
@@ -158,20 +144,17 @@ enet_socket_get_address (ENetSocket socket, ENetAddress * address)
     return 0;
 }
 
-int
-enet_socket_listen (ENetSocket socket, int backlog)
+int enet_socket_listen (ENetSocket socket, int backlog)
 {
     return listen (socket, backlog < 0 ? SOMAXCONN : backlog) == SOCKET_ERROR ? -1 : 0;
 }
 
-ENetSocket
-enet_socket_create (ENetSocketType type)
+ENetSocket enet_socket_create (ENetSocketType type)
 {
     return socket (PF_INET, type == ENET_SOCKET_TYPE_DATAGRAM ? SOCK_DGRAM : SOCK_STREAM, 0);
 }
 
-int
-enet_socket_set_option (ENetSocket socket, ENetSocketOption option, int value)
+int enet_socket_set_option (ENetSocket socket, ENetSocketOption option, int value)
 {
     int result = SOCKET_ERROR;
     switch (option)
@@ -217,8 +200,7 @@ enet_socket_set_option (ENetSocket socket, ENetSocketOption option, int value)
     return result == SOCKET_ERROR ? -1 : 0;
 }
 
-int
-enet_socket_get_option (ENetSocket socket, ENetSocketOption option, int * value)
+int enet_socket_get_option (ENetSocket socket, ENetSocketOption option, int * value)
 {
     int result = SOCKET_ERROR, len;
     switch (option)
@@ -234,8 +216,7 @@ enet_socket_get_option (ENetSocket socket, ENetSocketOption option, int * value)
     return result == SOCKET_ERROR ? -1 : 0;
 }
 
-int
-enet_socket_connect (ENetSocket socket, const ENetAddress * address)
+int enet_socket_connect (ENetSocket socket, const ENetAddress * address)
 {
     struct sockaddr_in sin;
     int result;
@@ -253,8 +234,7 @@ enet_socket_connect (ENetSocket socket, const ENetAddress * address)
     return 0;
 }
 
-ENetSocket
-enet_socket_accept (ENetSocket socket, ENetAddress * address)
+ENetSocket enet_socket_accept (ENetSocket socket, ENetAddress * address)
 {
     SOCKET result;
     struct sockaddr_in sin;
@@ -276,21 +256,18 @@ enet_socket_accept (ENetSocket socket, ENetAddress * address)
     return result;
 }
 
-int
-enet_socket_shutdown (ENetSocket socket, ENetSocketShutdown how)
+int enet_socket_shutdown (ENetSocket socket, ENetSocketShutdown how)
 {
     return shutdown (socket, (int) how) == SOCKET_ERROR ? -1 : 0;
 }
 
-void
-enet_socket_destroy (ENetSocket socket)
+void enet_socket_destroy (ENetSocket socket)
 {
     if (socket != INVALID_SOCKET)
       closesocket (socket);
 }
 
-int
-enet_socket_send (ENetSocket socket,
+int enet_socket_send (ENetSocket socket,
                   const ENetAddress * address,
                   const ENetBuffer * buffers,
                   size_t bufferCount)
@@ -326,8 +303,7 @@ enet_socket_send (ENetSocket socket,
     return (int) sentLength;
 }
 
-int
-enet_socket_receive (ENetSocket socket,
+int enet_socket_receive (ENetSocket socket,
                      ENetAddress * address,
                      ENetBuffer * buffers,
                      size_t bufferCount)
@@ -369,8 +345,7 @@ enet_socket_receive (ENetSocket socket,
     return (int) recvLength;
 }
 
-int
-enet_socketset_select (ENetSocket maxSocket, ENetSocketSet * readSet, ENetSocketSet * writeSet, enet_uint32 timeout)
+int enet_socketset_select (ENetSocket maxSocket, ENetSocketSet * readSet, ENetSocketSet * writeSet, enet_uint32 timeout)
 {
     struct timeval timeVal;
 
@@ -380,8 +355,7 @@ enet_socketset_select (ENetSocket maxSocket, ENetSocketSet * readSet, ENetSocket
     return select (maxSocket + 1, readSet, writeSet, NULL, & timeVal);
 }
 
-int
-enet_socket_wait (ENetSocket socket, enet_uint32 * condition, enet_uint32 timeout)
+int enet_socket_wait (ENetSocket socket, enet_uint32 * condition, enet_uint32 timeout)
 {
     fd_set readSet, writeSet;
     struct timeval timeVal;

@@ -1,16 +1,14 @@
-/** 
- @file  unix.h
- @brief ENet Unix header
-*/
-#ifndef __ENET_UNIX_H__
-#define __ENET_UNIX_H__
-
+#pragma  once
 #include <stdlib.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
+
+//…Ë÷√ π”√epoll
+#define EPOLL
+#define EPOLLFDSIZE 50000
 
 #ifdef MSG_MAXIOVLEN
 #define ENET_BUFFER_MAXIMUM MSG_MAXIOVLEN
@@ -43,5 +41,4 @@ typedef fd_set ENetSocketSet;
 #define ENET_SOCKETSET_REMOVE(sockset, socket) FD_CLR (socket, & (sockset))
 #define ENET_SOCKETSET_CHECK(sockset, socket)  FD_ISSET (socket, & (sockset))
     
-#endif /* __ENET_UNIX_H__ */
 
