@@ -7,6 +7,10 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "enet", "enet\enet.vcxproj",
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UDPServer", "UDPServer\UDPServer.vcxproj", "{9F1FEDE9-1F93-40D3-881D-6C6CBCDFF583}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "UDPClient", "UDPClient\UDPClient.vcxproj", "{7DB0108A-BA07-4FA2-95EE-97DE68935232}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Robot", "UDPRobot\Robot.vcxproj", "{EA1B33DC-2080-400A-842B-0F5EB1FE6C7D}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -31,6 +35,22 @@ Global
 		{9F1FEDE9-1F93-40D3-881D-6C6CBCDFF583}.Release|x64.Build.0 = Release|x64
 		{9F1FEDE9-1F93-40D3-881D-6C6CBCDFF583}.Release|x86.ActiveCfg = Release|Win32
 		{9F1FEDE9-1F93-40D3-881D-6C6CBCDFF583}.Release|x86.Build.0 = Release|Win32
+		{7DB0108A-BA07-4FA2-95EE-97DE68935232}.Debug|x64.ActiveCfg = Debug|x64
+		{7DB0108A-BA07-4FA2-95EE-97DE68935232}.Debug|x64.Build.0 = Debug|x64
+		{7DB0108A-BA07-4FA2-95EE-97DE68935232}.Debug|x86.ActiveCfg = Debug|Win32
+		{7DB0108A-BA07-4FA2-95EE-97DE68935232}.Debug|x86.Build.0 = Debug|Win32
+		{7DB0108A-BA07-4FA2-95EE-97DE68935232}.Release|x64.ActiveCfg = Release|x64
+		{7DB0108A-BA07-4FA2-95EE-97DE68935232}.Release|x64.Build.0 = Release|x64
+		{7DB0108A-BA07-4FA2-95EE-97DE68935232}.Release|x86.ActiveCfg = Release|Win32
+		{7DB0108A-BA07-4FA2-95EE-97DE68935232}.Release|x86.Build.0 = Release|Win32
+		{EA1B33DC-2080-400A-842B-0F5EB1FE6C7D}.Debug|x64.ActiveCfg = Debug|x64
+		{EA1B33DC-2080-400A-842B-0F5EB1FE6C7D}.Debug|x64.Build.0 = Debug|x64
+		{EA1B33DC-2080-400A-842B-0F5EB1FE6C7D}.Debug|x86.ActiveCfg = Debug|Win32
+		{EA1B33DC-2080-400A-842B-0F5EB1FE6C7D}.Debug|x86.Build.0 = Debug|Win32
+		{EA1B33DC-2080-400A-842B-0F5EB1FE6C7D}.Release|x64.ActiveCfg = Release|x64
+		{EA1B33DC-2080-400A-842B-0F5EB1FE6C7D}.Release|x64.Build.0 = Release|x64
+		{EA1B33DC-2080-400A-842B-0F5EB1FE6C7D}.Release|x86.ActiveCfg = Release|Win32
+		{EA1B33DC-2080-400A-842B-0F5EB1FE6C7D}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

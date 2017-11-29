@@ -32,9 +32,6 @@ extern "C"
 #define ENET_MAX(x, y) ((x) > (y) ? (x) : (y))
 #define ENET_MIN(x, y) ((x) < (y) ? (x) : (y))
 
-//time
-
-
 
 typedef enet_uint32 ENetVersion;
 
@@ -509,6 +506,16 @@ ENET_API int        enet_socketset_select (ENetSocket, ENetSocketSet *, ENetSock
 /** @defgroup Address ENet address functions
     @{
 */
+
+/** Attempts to parse the printable form of the IP address in the parameter hostName
+and sets the host field in the address parameter if successful.
+@param address destination to store the parsed IP address
+@param hostName IP address to parse
+@retval 0 on success
+@retval < 0 on failure
+@returns the address of the given hostName in address on success
+*/
+ENET_API int enet_address_set_host_ip(ENetAddress * address, const char * hostName);
 /** Attempts to resolve the host named by the parameter hostName and sets
     the host field in the address parameter if successful.
     @param address destination to store resolved address

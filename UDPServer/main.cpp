@@ -5,6 +5,7 @@
 
 int main()
 {
+	int index = 0;
 	if (enet_initialize() != 0)
 	{
 		fprintf(stderr, "An error occurred while initializing ENet.\n");
@@ -17,7 +18,7 @@ int main()
 	address.host = ENET_HOST_ANY;
 	enet_address_set_host(&address, "0.0.0.0");
 	address.port = 8888;
-	server = enet_host_create(&address ,32,2,0,0);
+	server = enet_host_create(&address, 4000, 2, 0, 0);
 	if (server == NULL)
 	{
 		std::cout << "An error occurred while trying to create an ENet server host.\n" << std::endl;
@@ -39,20 +40,16 @@ int main()
 				event.peer->data = (void*)"Client information";
 				break;
 			case ENET_EVENT_TYPE_RECEIVE:
-				/*printf("A packet of length %u containing %s was received from %s on channel %u.\n",
-					event.packet->dataLength,
-					event.packet->data,
-					event.peer->data,
-					event.channelID);*/
 				/* Clean up the packet now that we're done using it. */
 				std::cout << event.packet->data << std::endl;
+				index++;
+				std::cout << index << std::endl;
 				enet_packet_destroy(event.packet);
 				{
 					ENetPacket * packet = enet_packet_create("packet",
 						strlen("packet") + 1,
 						ENET_PACKET_FLAG_RELIABLE);
-					/* Extend the packet so and append the string "foo", so it now */
-					/* contains "packetfoo\0"                                      */
+
 					enet_packet_resize(packet, strlen("packetfoo----------------------") + 1);
 					strcpy((char*)&packet->data[strlen("packet")], "foo");
 					enet_peer_send(event.peer, 0, packet);

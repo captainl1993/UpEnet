@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #define ENET_BUILDING_LIB 1
-#include "time.h"
+#include "etime.h"
 #include "enet.h"
 
 static size_t commandSizes [ENET_PROTOCOL_COMMAND_COUNT] =

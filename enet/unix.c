@@ -11,7 +11,7 @@
 #include <unistd.h>
 #include <string.h>
 #include <errno.h>
-#include <time.h>
+#include "etime.h"
 
 #define ENET_BUILDING_LIB 1
 #include "enet.h"
@@ -87,38 +87,70 @@ void enet_time_set (enet_uint32 newTimeBase)
     timeBase = timeVal.tv_sec * 1000 + timeVal.tv_usec / 1000 - newTimeBase;
 }
 
+int enet_address_set_host_ip(ENetAddress * address, const char * name)
+{
+#ifdef HAS_INET_PTON
+	if (!inet_pton(AF_INET, name, &address->host))
+#else
+	if (!inet_aton(name, (struct in_addr *) & address->host))
+#endif
+		return -1;
+
+	return 0;
+}
+
 int enet_address_set_host (ENetAddress * address, const char * name)
 {
-    struct hostent * hostEntry = NULL;
+#ifdef HAS_GETADDRINFO
+	struct addrinfo hints, *resultList = NULL, *result = NULL;
+
+	memset(&hints, 0, sizeof(hints));
+	hints.ai_family = AF_INET;
+
+	if (getaddrinfo(name, NULL, NULL, &resultList) != 0)
+		return -1;
+
+	for (result = resultList; result != NULL; result = result->ai_next)
+	{
+		if (result->ai_family == AF_INET && result->ai_addr != NULL && result->ai_addrlen >= sizeof(struct sockaddr_in))
+		{
+			struct sockaddr_in * sin = (struct sockaddr_in *) result->ai_addr;
+
+			address->host = sin->sin_addr.s_addr;
+
+			freeaddrinfo(resultList);
+
+			return 0;
+		}
+	}
+
+	if (resultList != NULL)
+		freeaddrinfo(resultList);
+#else
+	struct hostent * hostEntry = NULL;
 #ifdef HAS_GETHOSTBYNAME_R
-    struct hostent hostData;
-    char buffer [2048];
-    int errnum;
+	struct hostent hostData;
+	char buffer[2048];
+	int errnum;
 
 #if defined(linux) || defined(__linux) || defined(__linux__) || defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || defined(__DragonFly__)
-    gethostbyname_r (name, & hostData, buffer, sizeof (buffer), & hostEntry, & errnum);
+	gethostbyname_r(name, &hostData, buffer, sizeof(buffer), &hostEntry, &errnum);
 #else
-    hostEntry = gethostbyname_r (name, & hostData, buffer, sizeof (buffer), & errnum);
+	hostEntry = gethostbyname_r(name, &hostData, buffer, sizeof(buffer), &errnum);
 #endif
 #else
-    hostEntry = gethostbyname (name);
+	hostEntry = gethostbyname(name);
 #endif
 
-    if (hostEntry == NULL ||
-        hostEntry -> h_addrtype != AF_INET)
-    {
-#ifdef HAS_INET_PTON
-        if (! inet_pton (AF_INET, name, & address -> host))
-#else
-        if (! inet_aton (name, (struct in_addr *) & address -> host))
+	if (hostEntry != NULL && hostEntry->h_addrtype == AF_INET)
+	{
+		address->host = *(enet_uint32 *)hostEntry->h_addr_list[0];
+
+		return 0;
+	}
 #endif
-            return -1;
-        return 0;
-    }
 
-    address -> host = * (enet_uint32 *) hostEntry -> h_addr_list [0];
-
-    return 0;
+	return enet_address_set_host_ip(address, name);
 }
 
 int enet_address_get_host_ip (const ENetAddress * address, char * name, size_t nameLength)

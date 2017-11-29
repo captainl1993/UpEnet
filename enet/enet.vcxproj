@@ -166,7 +166,7 @@
     <ClInclude Include="enet.h" />
     <ClInclude Include="list.h" />
     <ClInclude Include="protocol.h" />
-    <ClInclude Include="time.h" />
+    <ClInclude Include="etime.h" />
     <ClInclude Include="types.h" />
     <ClInclude Include="unix.h" />
     <ClInclude Include="win32.h" />
